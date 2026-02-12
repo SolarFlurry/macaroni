@@ -1,6 +1,8 @@
 const std = @import("std");
 
 const Token = @import("Token.zig");
+const Scope = @import("symtable/Scope.zig");
+const Symbol = @import("symtable/Symbol.zig");
 const reporter = @import("reporter.zig");
 
 const Self = @This();
@@ -22,27 +24,27 @@ pub const Data = union(enum) {
     },
 };
 
-pub fn writeHtml(self: *Self, writer: *std.io.Writer) WriteError!void {
+pub fn writeHtml(self: *Self, writer: *std.io.Writer, scope: *Scope) WriteError!void {
     switch (self.data) {
         .paragraph => |doc| {
             try writer.writeAll("<p>");
             for (doc.items) |node| {
-                try node.writeHtml(writer);
+                try node.writeHtml(writer, scope);
             }
             try writer.writeAll("</p>\n");
         },
         .macro => |macro| {
-            if (std.mem.eql(u8, macro.name, "b")) {
-                if (macro.body) |body| {
-                    try writer.writeAll("<b>");
-                    try body.writeHtml(writer);
-                    try writer.writeAll("</b>");
-                }
-            } else if (std.mem.eql(u8, macro.name, "i")) {
-                if (macro.body) |body| {
-                    try writer.writeAll("<i>");
-                    try body.writeHtml(writer);
-                    try writer.writeAll("</i>");
+            if (scope.findSymbol(macro.name)) |symbol| {
+                switch (symbol.value) {
+                    .builtin => |builtin| {
+                        try builtin(
+                            writer,
+                            macro.args,
+                            macro.body,
+                            scope,
+                        );
+                    },
+                    else => {},
                 }
             }
         },
@@ -71,7 +73,7 @@ pub fn print(self: *Self, indent: u32, indent_type: u32, has_lines: u64) void {
     switch (self.data) {
         .paragraph => |doc| {
             const len = doc.items.len;
-            std.debug.print("Paragraph\x1b[0m[{}]:\n", .{len});
+            std.debug.print("Paragraph\x1b[0m[\x1b[94m{}\x1b[0m]:\n", .{len});
             for (0..len) |i| {
                 const node = doc.items[i];
                 if (i < len - 1) {

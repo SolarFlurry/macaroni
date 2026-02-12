@@ -5,6 +5,8 @@ const Lexer = @import("Lexer.zig");
 const Token = @import("Token.zig");
 const AstNode = @import("AstNode.zig");
 
+const compiler = @import("../compiler.zig");
+
 const AllocError = std.mem.Allocator.Error;
 
 const Self = @This();
@@ -26,11 +28,11 @@ fn makeNode(self: *Self, value: AstNode.Data) AllocError!*AstNode {
     return node;
 }
 
-pub fn init(lexer: *Lexer, allocator: std.mem.Allocator) AllocError!Self {
+pub fn init(lexer: *Lexer) AllocError!Self {
     return .{
         .lexer = lexer,
-        .allocator = allocator,
-        .current = try lexer.nextToken(allocator, .Document),
+        .allocator = compiler.allocator,
+        .current = try lexer.nextToken(compiler.allocator, .Document),
         .context = .Document,
     };
 }

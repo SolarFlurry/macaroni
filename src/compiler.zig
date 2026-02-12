@@ -4,14 +4,22 @@ pub const Lexer = @import("compiler/Lexer.zig");
 pub const Parser = @import("compiler/Parser.zig");
 pub const AstNode = @import("compiler/AstNode.zig");
 pub const Token = @import("compiler/Token.zig");
+pub const Scope = @import("compiler/symtable/Scope.zig");
+pub const Symbol = @import("compiler/symtable/Symbol.zig");
 
 pub const reporter = @import("compiler/reporter.zig");
+
+const builtins = @import("compiler/builtins.zig");
+
+pub var allocator: std.mem.Allocator = undefined;
 
 pub fn compile(
     source_file: []const u8,
     output_stream: *std.fs.File,
-    allocator: std.mem.Allocator,
+    init_allocator: std.mem.Allocator,
 ) !void {
+    allocator = init_allocator;
+
     var cwd = std.fs.cwd();
     const file = try cwd.openFile(source_file, .{});
     defer file.close();
@@ -22,7 +30,10 @@ pub fn compile(
     _ = try file.read(file_data);
 
     var lexer = Lexer.init(file_data);
-    var parser = try Parser.init(&lexer, allocator);
+    var parser = try Parser.init(&lexer);
+
+    var symtable = Scope.init();
+    try builtins.populateSymtable(&symtable);
 
     const document = try parser.parse();
 
@@ -41,7 +52,7 @@ pub fn compile(
     var writer = output_stream.writer(&buffer);
 
     for (document.items) |node| {
-        try node.writeHtml(&writer.interface);
+        try node.writeHtml(&writer.interface, &symtable);
     }
 
     try writer.interface.writeByte('\n');
