@@ -1,5 +1,5 @@
 const std = @import("std");
-const compiler = @import("compiler.zig");
+const Compiler = @import("Compiler.zig");
 
 fn printError(comptime fmt: []const u8, args: anytype) noreturn {
     std.debug.print(fmt, args);
@@ -28,7 +28,7 @@ pub fn main() !void {
         output = std.fs.File.stdout();
     }
 
-    compiler.compile(file_path, &output, allocator) catch |err| {
+    Compiler.compile(file_path, &output, allocator) catch |err| {
         if (err == error.FileNotFound) {
             printError("Could not open file {s}", .{file_path});
         }

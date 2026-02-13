@@ -1,3 +1,5 @@
 hello world! \b{Bold text} is cool. This is \i{italic text}.
 
 another paragraph
+
+\b{bold \i{italic}}

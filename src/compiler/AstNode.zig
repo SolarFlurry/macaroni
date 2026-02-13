@@ -15,7 +15,7 @@ token: *Token,
 data: Data,
 
 pub const Data = union(enum) {
-    paragraph: std.ArrayList(*Self),
+    section: std.ArrayList(*Self),
     raw,
     macro: struct {
         name: []const u8,
@@ -26,7 +26,7 @@ pub const Data = union(enum) {
 
 pub fn writeHtml(self: *Self, writer: *std.io.Writer, scope: *Scope) WriteError!void {
     switch (self.data) {
-        .paragraph => |doc| {
+        .section => |doc| {
             try writer.writeAll("<p>");
             for (doc.items) |node| {
                 try node.writeHtml(writer, scope);
@@ -71,7 +71,7 @@ pub fn print(self: *Self, indent: u32, indent_type: u32, has_lines: u64) void {
     }
     std.debug.print("\x1b[36m", .{});
     switch (self.data) {
-        .paragraph => |doc| {
+        .section => |doc| {
             const len = doc.items.len;
             std.debug.print("Paragraph\x1b[0m[\x1b[94m{}\x1b[0m]:\n", .{len});
             for (0..len) |i| {

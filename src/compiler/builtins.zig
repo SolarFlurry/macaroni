@@ -4,7 +4,7 @@ const Scope = @import("symtable/Scope.zig");
 const Symbol = @import("symtable/Symbol.zig");
 const AstNode = @import("AstNode.zig");
 
-const compiler = @import("../compiler.zig");
+const Compiler = @import("../Compiler.zig");
 
 pub fn boldBuiltin(
     writer: *std.Io.Writer,
@@ -35,7 +35,7 @@ pub fn italicBuiltin(
 pub fn populateSymtable(symtable: *Scope) !void {
     const num_builtins = comptime @typeInfo(@This()).@"struct".decls.len - 1;
 
-    const slots = try symtable.symbols.addManyAsArray(compiler.allocator, num_builtins);
+    const slots = try symtable.symbols.addManyAsArray(Compiler.compiler.allocator, num_builtins);
     slots.* = [_]*const Symbol{
         &Symbol{ .name = "b", .value = .{ .builtin = boldBuiltin } },
         &Symbol{ .name = "i", .value = .{ .builtin = italicBuiltin } },

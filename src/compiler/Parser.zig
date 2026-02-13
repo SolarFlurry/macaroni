@@ -5,7 +5,7 @@ const Lexer = @import("Lexer.zig");
 const Token = @import("Token.zig");
 const AstNode = @import("AstNode.zig");
 
-const compiler = @import("../compiler.zig");
+const Compiler = @import("../Compiler.zig");
 
 const AllocError = std.mem.Allocator.Error;
 
@@ -31,8 +31,8 @@ fn makeNode(self: *Self, value: AstNode.Data) AllocError!*AstNode {
 pub fn init(lexer: *Lexer) AllocError!Self {
     return .{
         .lexer = lexer,
-        .allocator = compiler.allocator,
-        .current = try lexer.nextToken(compiler.allocator, .Document),
+        .allocator = Compiler.compiler.allocator,
+        .current = try lexer.nextToken(Compiler.compiler.allocator, .Document),
         .context = .Document,
     };
 }
@@ -47,7 +47,7 @@ pub fn parse(self: *Self) AllocError!AstNode.Root {
             },
             else => {
                 const slot = try document.addOne(self.allocator);
-                slot.* = try self.parseParagraph();
+                slot.* = try self.parseSection();
                 if (self.current.type == .Eof) {
                     break;
                 }
@@ -59,22 +59,22 @@ pub fn parse(self: *Self) AllocError!AstNode.Root {
     return document;
 }
 
-fn parseParagraph(self: *Self) AllocError!*AstNode {
-    const paragraph = try self.makeNode(.{ .paragraph = .empty });
+fn parseSection(self: *Self) AllocError!*AstNode {
+    const section = try self.makeNode(.{ .section = .empty });
 
     while (true) {
-        const slot = try paragraph.data.paragraph.addOne(self.allocator);
+        const slot = try section.data.section.addOne(self.allocator);
         slot.* = switch (self.current.type) {
             .Backslash => try self.parseMacro(),
             .Eof, .ParaSep => {
-                _ = paragraph.data.paragraph.pop();
+                _ = section.data.section.pop();
                 break;
             },
             else => try self.parseRaw(.Eof),
         };
     }
 
-    return paragraph;
+    return section;
 }
 fn parseRaw(self: *Self, stop_token: Token.Type) AllocError!*AstNode {
     const node = try self.allocator.create(AstNode);
