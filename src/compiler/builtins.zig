@@ -7,6 +7,8 @@ const Transpiler = @import("Transpiler.zig");
 
 const Compiler = @import("../Compiler.zig");
 
+const highlight = @import("Transpiler/highlight.zig");
+
 pub fn boldBuiltin(
     ctx: *Transpiler,
     _: std.ArrayList(*AstNode),
@@ -51,6 +53,24 @@ pub fn italicBuiltin(
     return tree;
 }
 
+pub fn codeblockBuiltin(
+    ctx: *Transpiler,
+    _: std.ArrayList(*AstNode),
+    body: ?*AstNode,
+    _: *Scope,
+) error{OutOfMemory}!*Transpiler.HtmlTree {
+    return if (body) |value|
+        highlight.highlight(ctx, "ts", value.token.data)
+    else blk: {
+        const tree = try ctx.allocator.create(Transpiler.HtmlTree);
+        tree.* = .{
+            .kind = .{ .leaf = "" },
+            .sibling = null,
+        };
+        break :blk tree;
+    };
+}
+
 pub fn populateSymtable(compiler: Compiler, symtable: *Scope) !void {
     const num_builtins = comptime @typeInfo(@This()).@"struct".decls.len - 1;
 
@@ -58,5 +78,6 @@ pub fn populateSymtable(compiler: Compiler, symtable: *Scope) !void {
     slots.* = [_]*const Symbol{
         &Symbol{ .name = "b", .value = .{ .builtin = boldBuiltin } },
         &Symbol{ .name = "i", .value = .{ .builtin = italicBuiltin } },
+        &Symbol{ .name = "codeblock", .value = .{ .builtin = codeblockBuiltin } },
     };
 }
