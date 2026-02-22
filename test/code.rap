@@ -1,4 +1,6 @@
 \codeblock{
 let i = 1;
 console.log("Hello, world!");
+
+i = 2;
 }

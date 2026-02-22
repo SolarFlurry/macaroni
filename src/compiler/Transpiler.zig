@@ -40,6 +40,7 @@ pub fn transpileNode(self: *Self, node: *const AstNode, scope: *Scope) AllocErro
                 .kind = .{ .tag = .{
                     .first_child = data,
                     .name = "p",
+                    .props = .init(self.allocator),
                 } },
                 .sibling = null,
             };

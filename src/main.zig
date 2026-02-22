@@ -34,4 +34,6 @@ pub fn main() !void {
         }
         printError("Error compiling {s}", .{file_path});
     };
+
+    std.debug.print("\n\x1b[1mMemory allocated: {} bytes\x1b[0m\n", .{gpa.queryCapacity()});
 }

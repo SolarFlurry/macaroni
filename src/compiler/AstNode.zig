@@ -25,31 +25,25 @@ pub const Data = union(enum) {
     },
 };
 
-pub fn writeHtml(self: *Self, writer: *std.io.Writer, scope: *Scope) WriteError!void {
+pub fn rawContents(self: *Self, allocator: std.mem.Allocator, string: *std.ArrayList(u8), sectionEnd: bool) error{OutOfMemory}!void {
     switch (self.data) {
-        .section => |doc| {
-            try writer.writeAll("<p>");
-            for (doc.items) |node| {
-                try node.writeHtml(writer, scope);
-            }
-            try writer.writeAll("</p>\n");
-        },
+        .raw => try string.appendSlice(allocator, self.token.data),
         .macro => |macro| {
-            if (scope.findSymbol(macro.name)) |symbol| {
-                switch (symbol.value) {
-                    .builtin => |builtin| {
-                        try builtin(
-                            writer,
-                            macro.args,
-                            macro.body,
-                            scope,
-                        );
-                    },
-                    else => {},
-                }
+            try string.append(allocator, '\\');
+            try string.appendSlice(allocator, macro.name);
+        },
+        .section => |section| {
+            for (section.elements.items, 0..section.elements.items.len) |element, i| {
+                try element.rawContents(
+                    allocator,
+                    string,
+                    i == section.elements.items.len - 1,
+                );
+            }
+            if (section.is_paragraph and !sectionEnd) {
+                try string.appendSlice(allocator, "\n\n");
             }
         },
-        .raw => try writer.writeAll(self.token.data),
     }
 }
 fn printIndent(indent: u32, has_lines: u64) void {
@@ -101,6 +95,19 @@ pub fn print(self: *Self, indent: u32, indent_type: u32, has_lines: u64) void {
                 }
             }
         },
-        .raw => std.debug.print("Raw\x1b[0m   -> \x1b[93m'{s}'\x1b[0m\n", .{self.token.data}),
+        .raw => {
+            std.debug.print("Raw\x1b[0m   -> \x1b[93m'", .{});
+            for (self.token.data, 0..self.token.data.len) |c, i| {
+                if (c == '\n') {
+                    if (i < self.token.data.len - 1) {
+                        @branchHint(.likely);
+                        std.debug.print("...", .{});
+                    }
+                    break;
+                }
+                std.debug.print("{c}", .{c});
+            }
+            std.debug.print("'\x1b[0m\n", .{});
+        },
     }
 }

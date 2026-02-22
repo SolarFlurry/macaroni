@@ -22,6 +22,7 @@ pub fn highlight(ctx: *Transpiler, language: []const u8, data: []const u8) error
             .kind = .{ .tag = .{
                 .name = "code-block",
                 .first_child = null,
+                .props = .init(ctx.allocator),
             } },
             .sibling = null,
         };
@@ -40,10 +41,12 @@ pub fn highlight(ctx: *Transpiler, language: []const u8, data: []const u8) error
             intermediate.* = .{
                 .kind = .{ .tag = .{
                     .first_child = leaf,
-                    .name = @tagName(token.type),
+                    .name = "h-",
+                    .props = .init(ctx.allocator),
                 } },
                 .sibling = null,
             };
+            intermediate.kind.tag.props.put(@tagName(token.type), "") catch @panic("props put");
             tree.addChild(intermediate);
         }
 

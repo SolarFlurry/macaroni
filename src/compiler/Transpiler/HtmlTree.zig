@@ -9,6 +9,7 @@ pub const Kind = union(enum) {
     tag: struct {
         first_child: ?*Self,
         name: []const u8,
+        props: std.StringArrayHashMap([]const u8),
     },
     leaf: []const u8,
 };
@@ -37,7 +38,16 @@ pub fn addChild(self: *Self, child: *Self) void {
 pub fn writeHtml(self: *Self, writer: *std.Io.Writer) error{WriteFailed}!void {
     switch (self.kind) {
         .tag => |tag| {
-            try writer.print("<{s}>", .{tag.name});
+            try writer.print("<{s}", .{tag.name});
+            var iter = tag.props.iterator();
+            while (iter.next()) |entry| {
+                try writer.writeByte(' ');
+                _ = try writer.write(entry.key_ptr.*);
+                if (entry.value_ptr.*.len > 0) {
+                    try writer.print("=\"{s}\"", .{entry.value_ptr.*});
+                }
+            }
+            try writer.writeByte('>');
             if (tag.first_child) |child| {
                 try child.writeHtml(writer);
             }

@@ -21,6 +21,7 @@ pub fn boldBuiltin(
         .kind = .{ .tag = .{
             .first_child = try ctx.transpileNode(value, scope),
             .name = "b",
+            .props = .init(ctx.allocator),
         } },
         .sibling = null,
     } else .{
@@ -43,6 +44,7 @@ pub fn italicBuiltin(
         .kind = .{ .tag = .{
             .first_child = try ctx.transpileNode(value, scope),
             .name = "i",
+            .props = .init(ctx.allocator),
         } },
         .sibling = null,
     } else .{
@@ -59,9 +61,11 @@ pub fn codeblockBuiltin(
     body: ?*AstNode,
     _: *Scope,
 ) error{OutOfMemory}!*Transpiler.HtmlTree {
-    return if (body) |value|
-        highlight.highlight(ctx, "ts", value.token.data)
-    else blk: {
+    return if (body) |value| {
+        var string = std.ArrayList(u8).empty;
+        try value.rawContents(ctx.allocator, &string, false);
+        return try highlight.highlight(ctx, "ts", string.items);
+    } else blk: {
         const tree = try ctx.allocator.create(Transpiler.HtmlTree);
         tree.* = .{
             .kind = .{ .leaf = "" },
