@@ -122,6 +122,8 @@ fn parseRaw(self: *Self, stop_token: Token.Type) AllocError!*AstNode {
     node.token.data.len = 0;
     node.data = .raw;
 
+    self.lexer.braces = 0;
+
     while (true) {
         if (self.current.type == stop_token) {
             return node;

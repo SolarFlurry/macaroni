@@ -1,6 +1,9 @@
+This is some \b{TypeScript} code wow!
 \codeblock{
-let i = 1;
-console.log("Hello, world!");
+let i: number = 0;
 
-i = 2;
+while (i < 10) {
+	i += 1;
+	console.log("The number is: ", i);
+}
 }

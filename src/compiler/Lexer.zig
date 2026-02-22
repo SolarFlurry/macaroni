@@ -13,6 +13,7 @@ data: []const u8,
 start: usize,
 current: usize,
 location: Span,
+braces: i32,
 
 fn makeToken(self: *Self, token_type: Token.Type, allocator: std.mem.Allocator) AllocError!*Token {
     const token = try allocator.create(Token);
@@ -81,7 +82,14 @@ pub fn nextToken(self: *Self, allocator: std.mem.Allocator, context: Parser.Cont
             }
             outer: while (!self.isEnd()) {
                 switch (self.peek(0)) {
-                    '\\', '{', '}' => break :outer,
+                    '\\' => break :outer,
+                    '{' => self.braces += 1,
+                    '}' => {
+                        self.braces -= 1;
+                        if (self.braces < 0) {
+                            break :outer;
+                        }
+                    },
                     '\n' => {
                         if (self.peek(1) == '\n') break :outer;
                     },
@@ -117,5 +125,6 @@ pub fn init(compiler: Compiler) Self {
         .start = 0,
         .current = 0,
         .location = .{ .col = 0, .line = 0 },
+        .braces = 0,
     };
 }

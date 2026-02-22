@@ -1,0 +1,46 @@
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Template Test</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Fira+Code:wght@300..700&display=swap" rel="stylesheet">
+	<style>
+		* {
+			--main-font: "Cormorant Garamond", serif;
+			--monospace-font: "Fira Code", monospace;
+		}
+		:root {
+			font-family: var(--main-font);
+		}
+		code-block {
+			font-family: var(--monospace-font);
+			white-space: pre;
+		}
+		h-[Keyword] {
+			color: rgb(184, 96, 187);
+		}
+		h-[Ident] {
+			color: rgb(109, 163, 183);
+		}
+		h-[String] {
+			color: rgb(186, 108, 56);
+		}
+		h-[Number] {
+			color: rgb(159, 198, 132)
+		}
+	</style>
+</head>
+<body>
+This is some <b>TypeScript</b> code wow!
+<code-block>
+<h- Keyword>let</h-> <h- Ident>i</h-><h- Symbol>:</h-> <h- Keyword>number</h-> <h- Symbol>=</h-> <h- Number>0</h-><h- Symbol>;</h->
+
+<h- Keyword>while</h-> <h- Symbol>(</h-><h- Ident>i</h-> <h- Symbol><</h-> <h- Number>10</h-><h- Symbol>)</h-> <h- Symbol>{</h->
+	<h- Ident>i</h-> <h- Symbol>+</h-><h- Symbol>=</h-> <h- Number>1</h-><h- Symbol>;</h->
+	<h- Ident>console</h-><h- Symbol>.</h-><h- Ident>log</h-><h- Symbol>(</h-><h- String>"The number is: "</h-><h- Symbol>,</h-> <h- Ident>i</h-><h- Symbol>)</h-><h- Symbol>;</h->
+<h- Symbol>}</h->
+</code-block>
+</body>
+</html>
