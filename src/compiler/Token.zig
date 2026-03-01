@@ -15,10 +15,12 @@ pub const Type = enum {
     Backslash,
     RightBrace,
     LeftBrace,
-
     Ident,
+    Number,
+    String,
     RightParen,
     LeftParen,
+    Comma,
 };
 
 pub fn print(self: *Self) void {

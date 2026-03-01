@@ -73,6 +73,17 @@ pub fn transpileNode(self: *Self, node: *const AstNode, scope: *Scope) AllocErro
 
             break :blk tree;
         },
+        .expression => |expr| blk: {
+            const tree = try self.allocator.create(HtmlTree);
+            tree.* = .{
+                .kind = .{
+                    .leaf = expr.literal_string,
+                },
+                .sibling = null,
+            };
+
+            break :blk tree;
+        },
     };
 
     if (tree) |inner| {

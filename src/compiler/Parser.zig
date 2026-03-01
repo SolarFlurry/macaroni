@@ -18,7 +18,7 @@ allocator: std.mem.Allocator,
 
 pub const Context = enum {
     Document,
-    Macro,
+    Expr,
 };
 
 fn makeNode(self: *Self, value: AstNode.Data) AllocError!*AstNode {
@@ -140,7 +140,7 @@ fn parseRaw(self: *Self, stop_token: Token.Type) AllocError!*AstNode {
 }
 
 fn parseMacro(self: *Self) AllocError!*AstNode {
-    self.context = .Macro;
+    self.context = .Expr;
     try self.consume(.Backslash, "Expected '\\'", .{});
 
     const name = self.current.data;
@@ -154,6 +154,11 @@ fn parseMacro(self: *Self) AllocError!*AstNode {
 
     if (self.current.type == .LeftParen) {
         try self.next();
+        for (0..16) |_| {
+            try node.data.macro.args.append(self.allocator, try self.parseExpression());
+            if (self.current.type == .Eof or self.current.type == .RightParen) break;
+            try self.consume(.Comma, "Expected ','", .{});
+        }
         try self.consume(.RightParen, "Expected matching ')'", .{});
     }
 
@@ -165,6 +170,20 @@ fn parseMacro(self: *Self) AllocError!*AstNode {
     }
 
     return node;
+}
+
+fn parseExpression(self: *Self) AllocError!*AstNode {
+    std.debug.assert(self.context == .Expr);
+    return try self.makeNode(switch (self.current.type) {
+        .Ident, .String => blk: {
+            const node: AstNode.Data = .{ .expression = .{
+                .literal_string = self.current.data,
+            } };
+            try self.next();
+            break :blk node;
+        },
+        else => @panic("Unexpected token"),
+    });
 }
 
 fn next(self: *Self) AllocError!void {

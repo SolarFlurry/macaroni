@@ -1,3 +1,22 @@
-<p>hello world! <b>Bold text</b> is cool. This is <i>italic text</i>.</p>
-<p>another paragraph</p>
-<p><b>bold <i>italic</i></b></p>
+<p>The TypeScript `match` expression
+Feb 8, 2026</p>
+<p>Rust's match expression is amazing. It was inspired by ML family languages like Haskell and OCaml, and languages like Zig and Swift
+are also adopting it. Then I look at the go-to scripting language, TypeScript, and think: "Man, if only TypeScript had this".
+Well, it sort of does, with 50-year old C-style switch statements. But these have many flaws, with not being expressions
+one of them.</p>
+<p>EDIT: Haskell is actually not an ML-family language, but it was inspired by them</p>
+<p>So, why not create a match expression in TypeScript? Here is some mockup syntax:
+<code-block>
+<h- Keyword>const</h-> <h- Ident>a</h-> <h- Symbol>=</h-> <h- String>"hello"</h-><h- Symbol>;</h->
+
+<h- Keyword>const</h-> <h- Ident>b</h-> <h- Symbol>=</h-> <h- Function>match</h-><h- LeftParen>(</h-><h- Ident>a</h-><h- Symbol>,</h-> <h- Symbol>{</h->
+    <h- String>"hello"</h-><h- Symbol>:</h-> <h- LeftParen>(</h-><h- RightParen>)</h-> <h- Symbol>=</h-><h- Symbol>></h-> <h- Number>7</h-><h- Symbol>,</h->
+    <h- String>"world"</h-><h- Symbol>:</h-> <h- LeftParen>(</h-><h- RightParen>)</h-> <h- Symbol>=</h-><h- Symbol>></h-> <h- Number>42</h-><h- Symbol>,</h->
+<h- Symbol>}</h-><h- RightParen>)</h->
+
+<h- Ident>console</h-><h- Symbol>.</h-><h- Function>log</h-><h- LeftParen>(</h-><h- Ident>b</h-><h- RightParen>)</h-> <h- Symbol>/</h-><h- Symbol>/</h-> <h- Ident>Output</h-><h- Symbol>:</h-> <h- Number>7</h->
+</code-block></p>
+<p>I find this syntax kind of close to Rust, with the =>.
+The reason it uses functions and not direct values is that sometimes some additional info may be passed into the function,
+like with Rust enum destructuring, though that is for another day.
+</p>

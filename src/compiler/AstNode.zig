@@ -23,6 +23,9 @@ pub const Data = union(enum) {
         args: std.ArrayList(*Self),
         body: ?*Self,
     },
+    expression: union(enum) {
+        literal_string: []const u8,
+    },
 };
 
 pub fn rawContents(self: *Self, allocator: std.mem.Allocator, string: *std.ArrayList(u8), sectionEnd: bool) error{OutOfMemory}!void {
@@ -42,6 +45,11 @@ pub fn rawContents(self: *Self, allocator: std.mem.Allocator, string: *std.Array
             }
             if (section.is_paragraph and !sectionEnd) {
                 try string.appendSlice(allocator, "\n\n");
+            }
+        },
+        .expression => |expr| {
+            switch (expr) {
+                .literal_string => |lit| try string.appendSlice(allocator, lit),
             }
         },
     }
@@ -108,6 +116,9 @@ pub fn print(self: *Self, indent: u32, indent_type: u32, has_lines: u64) void {
                 std.debug.print("{c}", .{c});
             }
             std.debug.print("'\x1b[0m\n", .{});
+        },
+        .expression => |expr| {
+            std.debug.print("String\x1b[0m -> \x1b[93m\"{s}\"\n", .{expr.literal_string});
         },
     }
 }

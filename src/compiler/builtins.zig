@@ -57,14 +57,16 @@ pub fn italicBuiltin(
 
 pub fn codeblockBuiltin(
     ctx: *Transpiler,
-    _: std.ArrayList(*AstNode),
+    args: std.ArrayList(*AstNode),
     body: ?*AstNode,
     _: *Scope,
 ) error{OutOfMemory}!*Transpiler.HtmlTree {
+    if (args.items.len != 1) @panic("Expected 1 argument");
+
     return if (body) |value| {
         var string = std.ArrayList(u8).empty;
         try value.rawContents(ctx.allocator, &string, false);
-        return try highlight.highlight(ctx, "ts", string.items);
+        return try highlight.highlight(ctx, args.items[0].data.expression.literal_string, string.items);
     } else blk: {
         const tree = try ctx.allocator.create(Transpiler.HtmlTree);
         tree.* = .{

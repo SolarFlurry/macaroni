@@ -5,10 +5,14 @@ const Self = @This();
 pub const Type = enum {
     Whitespace,
     Unknown,
+    Comment,
     Ident,
+    Function,
     Keyword,
     Number,
     String,
+    LeftParen,
+    RightParen,
     Symbol,
 };
 

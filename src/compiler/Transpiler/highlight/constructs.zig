@@ -3,6 +3,25 @@ const std = @import("std");
 const Transpiler = @import("../../Transpiler.zig");
 const Token = @import("Token.zig");
 
+pub const Parser = struct {
+    current: usize,
+    tokList: std.ArrayList(*Token),
+
+    pub fn nextTok(self: *Parser) Token.Type {
+        defer self.current += 1;
+        if (self.current >= self.tokList.items.len) {
+            return .Unknown;
+        }
+        while (self.tokList.items[self.current].type == .Whitespace) {
+            self.current += 1;
+            if (self.current >= self.tokList.items.len) {
+                return .Unknown;
+            }
+        }
+        return self.tokList.items[self.current].type;
+    }
+};
+
 pub fn keywordsFromList(comptime keywords: []const u8) std.StaticStringMap(void) {
     @setEvalBranchQuota(2000);
 

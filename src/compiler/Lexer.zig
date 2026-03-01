@@ -99,11 +99,24 @@ pub fn nextToken(self: *Self, allocator: std.mem.Allocator, context: Parser.Cont
             }
             return self.makeToken(.Raw, allocator);
         },
-        .Macro => {
+        .Expr => {
             if (std.ascii.isAlphabetic(c)) {
                 while (!self.isEnd() and (std.ascii.isAlphanumeric(self.peek(0)) or self.peek(0) == '_'))
                     self.next();
                 return try self.makeToken(.Ident, allocator);
+            }
+            if (std.ascii.isDigit(c)) {
+                while (!self.isEnd() and std.ascii.isDigit(c))
+                    self.next();
+                if (self.peek(0) != '.') return try self.makeToken(.Number, allocator);
+                while (!self.isEnd() and std.ascii.isDigit(c))
+                    self.next();
+                if (self.peek(0) != '.') return try self.makeToken(.Number, allocator);
+            }
+            if (c == '"') {
+                self.next();
+                while (!self.isEnd() and self.peek(0) != '"') self.next();
+                return try self.makeToken(.String, allocator);
             }
             self.next();
             return switch (c) {
@@ -111,6 +124,7 @@ pub fn nextToken(self: *Self, allocator: std.mem.Allocator, context: Parser.Cont
                 '}' => self.makeToken(.RightBrace, allocator),
                 '(' => self.makeToken(.LeftParen, allocator),
                 ')' => self.makeToken(.RightParen, allocator),
+                ',' => self.makeToken(.Comma, allocator),
                 else => {
                     std.debug.panic("Unexpected character '{}'", .{c});
                 },
